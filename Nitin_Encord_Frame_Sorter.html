@@ -1,0 +1,862 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Encord Frame Sorter | Nitin Dhurve</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+:root{
+ --bg:#080d1b;
+ --panel:#111a2e;
+ --panel2:#14213b;
+ --blue:#568cff;
+ --cyan:#29d8f2;
+ --text:#edf3ff;
+ --muted:#91a2c1;
+ --border:rgba(142,169,220,.15);
+ --input:#080f20;
+ --table:#1b2942;
+ --row-hover:#568cff12;
+ --footer:#6caaff;
+ --shadow:#00000028;
+}
+
+*{box-sizing:border-box}
+
+body{
+ margin:0;
+ min-height:100vh;
+ padding:30px 18px;
+ font-family:Inter,Arial,sans-serif;
+ color:var(--text);
+ background:
+ radial-gradient(ellipse at 10% 10%,#142b58 0,transparent 40%),
+ radial-gradient(ellipse at 90% 80%,#14264a 0,transparent 38%),
+ var(--bg);
+ overflow-x:hidden;
+ transition:background .35s,color .35s;
+}
+
+body:before,body:after{
+ content:"";
+ position:fixed;
+ width:350px;height:350px;
+ border-radius:50%;
+ filter:blur(100px);
+ opacity:.15;
+ pointer-events:none;
+ z-index:-1;
+ animation:float 12s ease-in-out infinite alternate;
+}
+body:before{background:#247cff;top:-100px;right:-80px}
+body:after{background:#12cde9;bottom:-120px;left:-100px;animation-delay:-5s}
+
+@keyframes float{
+ from{transform:translate(0,0)}
+ to{transform:translate(70px,55px)}
+}
+@keyframes appear{
+ from{opacity:0;transform:translateY(20px)}
+ to{opacity:1;transform:translateY(0)}
+}
+@keyframes shine{
+ from{background-position:200% center}
+ to{background-position:-200% center}
+}
+@keyframes rowIn{
+ from{opacity:0;transform:translateX(-12px)}
+ to{opacity:1;transform:translateX(0)}
+}
+
+.container{max-width:1180px;margin:auto;animation:appear .7s ease}
+
+.topbar{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:15px;
+ margin-bottom:28px;
+}
+
+.logo{display:flex;align-items:center;gap:12px}
+
+.logo-icon{
+ width:46px;height:46px;
+ display:grid;place-items:center;
+ border-radius:14px;
+ font-size:23px;
+ background:linear-gradient(135deg,#438cff,#16c9e9);
+ box-shadow:0 5px 25px #268bff50;
+}
+
+.logo h2{font-size:17px;margin:0;font-weight:800}
+.logo small{
+ display:block;color:var(--muted);
+ font-size:10px;margin-top:4px;letter-spacing:1.5px
+}
+
+.top-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+.status{
+ display:flex;align-items:center;gap:8px;
+ padding:9px 14px;
+ border:1px solid var(--border);
+ border-radius:30px;
+ background:#ffffff08;
+ color:var(--muted);
+ font-size:11px;
+}
+
+.dot{
+ width:8px;height:8px;border-radius:50%;
+ background:#34df9b;
+ box-shadow:0 0 12px #34df9b;
+}
+
+.theme-btn{
+ display:flex;align-items:center;gap:8px;
+ padding:10px 14px;
+ border-radius:30px;
+ border:1px solid var(--border);
+ background:#ffffff0a;
+ color:var(--text);
+ font-size:11px;
+ font-weight:800;
+ cursor:pointer;
+ transition:.25s;
+}
+.theme-btn:hover{transform:translateY(-2px);border-color:var(--blue)}
+
+.hero{text-align:center;padding:32px 10px 30px}
+
+.tag{
+ display:inline-block;
+ padding:7px 14px;
+ border-radius:30px;
+ border:1px solid #568cff50;
+ background:#568cff13;
+ color:#80b3ff;
+ font-size:10px;
+ font-weight:800;
+ letter-spacing:2px;
+}
+
+.hero h1{
+ font-size:clamp(30px,5vw,49px);
+ line-height:1.15;
+ margin:18px 0 12px;
+ font-weight:900;
+ letter-spacing:-2px;
+}
+
+.gradient{
+ background:linear-gradient(90deg,#66a1ff,#42e1ed,#a68aff,#66a1ff);
+ background-size:250%;
+ -webkit-background-clip:text;
+ background-clip:text;
+ color:transparent;
+ animation:shine 7s linear infinite;
+}
+
+.hero p{
+ color:var(--muted);
+ font-size:13px;
+ line-height:1.8;
+ max-width:610px;
+ margin:auto;
+}
+
+.panel{
+ background:linear-gradient(145deg,var(--panel),var(--bg));
+ border:1px solid var(--border);
+ border-radius:19px;
+ padding:23px;
+ margin-bottom:20px;
+ box-shadow:0 20px 65px var(--shadow);
+ transition:.3s;
+}
+.panel:hover{border-color:#568cff48}
+
+.section-head{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:12px;
+ margin-bottom:17px;
+}
+.section-head h3{font-size:14px;margin:0}
+.section-head span{font-size:11px;color:var(--muted)}
+
+textarea{
+ width:100%;
+ min-height:175px;
+ padding:17px;
+ background:var(--input);
+ color:var(--text);
+ border:1px solid var(--border);
+ border-radius:12px;
+ resize:vertical;
+ outline:none;
+ font:12px/1.8 monospace;
+ transition:.3s;
+}
+textarea:focus{
+ border-color:var(--blue);
+ box-shadow:0 0 0 3px #568cff20,0 0 25px #568cff15;
+}
+textarea::placeholder{color:var(--muted)}
+
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+
+button{
+ border:1px solid transparent;
+ border-radius:10px;
+ padding:12px 17px;
+ cursor:pointer;
+ font-size:11px;
+ font-weight:800;
+ font-family:inherit;
+ transition:all .25s;
+}
+button:hover:not(:disabled){transform:translateY(-3px);filter:brightness(1.15)}
+button:active:not(:disabled){transform:scale(.97)}
+button:disabled{opacity:.35;cursor:not-allowed}
+
+.primary{
+ color:white;
+ background:linear-gradient(120deg,#3478ff,#24bde7);
+ box-shadow:0 5px 20px #368bff35;
+}
+.secondary{
+ background:#ffffff0a;
+ color:var(--text);
+ border-color:var(--border);
+}
+.clear{
+ background:#ff536015;
+ color:#ff8994;
+ border-color:#ff536030;
+}
+
+.error{color:#ff929c;font-size:12px;margin-top:13px}
+
+.stats{
+ display:grid;
+ grid-template-columns:repeat(4,1fr);
+ gap:14px;
+ margin-bottom:20px;
+}
+
+.stat{
+ background:linear-gradient(145deg,var(--panel2),var(--panel));
+ border:1px solid var(--border);
+ border-radius:15px;
+ padding:18px;
+ position:relative;
+ overflow:hidden;
+ transition:.3s;
+}
+.stat:hover{transform:translateY(-5px);border-color:#568cff70}
+.stat:after{
+ content:"";
+ position:absolute;
+ width:90px;height:90px;
+ background:#568cff13;
+ filter:blur(25px);
+ right:-20px;top:-20px;
+}
+.stat-label{font-size:10px;color:var(--muted);font-weight:700}
+.stat-value{font-size:25px;font-weight:900;margin-top:10px}
+.stat-icon{font-size:19px;float:right}
+
+.results{animation:appear .5s ease}
+
+.results-header{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ gap:12px;
+ flex-wrap:wrap;
+ margin-bottom:17px;
+}
+.results-header h3{font-size:16px;margin:0}
+.results-header p{font-size:11px;color:var(--muted);margin:6px 0 0}
+
+.tablewrap{
+ overflow:auto;
+ border:1px solid var(--border);
+ border-radius:12px;
+}
+table{
+ border-collapse:collapse;
+ width:100%;
+ min-width:760px;
+ font-size:11px;
+}
+th{
+ padding:15px 12px;
+ background:var(--table);
+ color:var(--muted);
+ text-align:left;
+ font-size:10px;
+ text-transform:uppercase;
+ letter-spacing:.6px;
+}
+td{
+ padding:14px 12px;
+ border-bottom:1px solid var(--border);
+ color:var(--text);
+}
+tbody tr{animation:rowIn .35s ease both;transition:.2s}
+tbody tr:hover{background:var(--row-hover)}
+
+td.name{
+ font-family:monospace;
+ max-width:300px;
+ overflow-wrap:anywhere;
+ color:var(--blue);
+}
+.rank{color:var(--blue);font-weight:900}
+.frame{font-weight:900}
+
+.badge{
+ display:inline-block;
+ padding:5px 9px;
+ border-radius:20px;
+ font-size:9px;
+ font-weight:800;
+ background:#1c8d6520;
+ color:#55dfaa;
+}
+.best{background:#e4ae3420;color:#d99a28}
+
+.note{
+ color:var(--muted);
+ font-size:10px;
+ line-height:1.8;
+ margin-top:15px;
+}
+
+.footer{
+ margin-top:28px;
+ text-align:center;
+ padding:23px 10px;
+ border-top:1px solid var(--border);
+}
+.footer .made{font-size:13px;font-weight:800}
+.footer .made span{color:var(--footer)}
+.footer p{font-size:10px;color:var(--muted);line-height:1.8}
+.footer .hash{color:#50cce9;font-weight:800;letter-spacing:1px}
+
+.github-link{
+ display:inline-flex;
+ align-items:center;
+ gap:7px;
+ color:var(--blue);
+ text-decoration:none;
+ font-size:11px;
+ font-weight:800;
+ transition:.3s;
+}
+.github-link:hover{color:var(--cyan);text-shadow:0 0 12px #35d8f255}
+
+.hide{display:none!important}
+
+.toast{
+ position:fixed;
+ bottom:25px;
+ left:50%;
+ transform:translate(-50%,100px);
+ opacity:0;
+ background:var(--panel2);
+ color:var(--text);
+ border:1px solid #568cff60;
+ padding:13px 20px;
+ border-radius:12px;
+ font-size:12px;
+ font-weight:700;
+ box-shadow:0 10px 35px var(--shadow);
+ transition:.4s;
+ z-index:10;
+}
+.toast.show{transform:translate(-50%,0);opacity:1}
+
+/* LIGHT THEME */
+
+body[data-theme="light"]{
+ --bg:#edf3fc;
+ --panel:#ffffff;
+ --panel2:#f5f8ff;
+ --text:#17253d;
+ --muted:#61718b;
+ --border:rgba(55,83,125,.16);
+ --input:#f7f9fd;
+ --table:#e5edf9;
+ --row-hover:#568cff12;
+ --footer:#286ad2;
+ --shadow:#35507815;
+ background:
+ radial-gradient(ellipse at 10% 10%,#c8dcff 0,transparent 40%),
+ radial-gradient(ellipse at 90% 80%,#d5f5ff 0,transparent 38%),
+ var(--bg);
+}
+body[data-theme="light"]:before,
+body[data-theme="light"]:after{opacity:.12}
+body[data-theme="light"] .status,
+body[data-theme="light"] .theme-btn,
+body[data-theme="light"] .secondary{background:#ffffffaa}
+body[data-theme="light"] .panel{
+ background:linear-gradient(145deg,#fff,#f6f9ff);
+}
+body[data-theme="light"] .stat{
+ background:linear-gradient(145deg,#fff,#f1f6ff);
+}
+body[data-theme="light"] textarea{color:#263c5b}
+body[data-theme="light"] th{color:#455a78}
+body[data-theme="light"] td{color:#293c57}
+body[data-theme="light"] .frame{color:#173b71}
+body[data-theme="light"] .toast{
+ background:#fff;color:#17253d;
+}
+
+/* MIDNIGHT PURPLE THEME */
+
+body[data-theme="purple"]{
+ --bg:#10091d;
+ --panel:#211333;
+ --panel2:#2a1742;
+ --text:#f5eaff;
+ --muted:#b29bc9;
+ --border:rgba(196,139,255,.19);
+ --input:#170d25;
+ --table:#351c50;
+ --row-hover:#a65aff16;
+ --blue:#bd8aff;
+ --footer:#c99aff;
+ --shadow:#00000035;
+ background:
+ radial-gradient(ellipse at 10% 10%,#482268 0,transparent 40%),
+ radial-gradient(ellipse at 90% 80%,#25215e 0,transparent 38%),
+ var(--bg);
+}
+body[data-theme="purple"]:before{background:#a23bff}
+body[data-theme="purple"]:after{background:#563cff}
+body[data-theme="purple"] .panel{
+ background:linear-gradient(145deg,#28173d,#170e29);
+}
+body[data-theme="purple"] .stat{
+ background:linear-gradient(145deg,#321d4c,#211333);
+}
+body[data-theme="purple"] .logo-icon{
+ background:linear-gradient(135deg,#a35bff,#e05dff);
+}
+body[data-theme="purple"] .primary{
+ background:linear-gradient(120deg,#8847db,#d14ce8);
+}
+body[data-theme="purple"] .gradient{
+ background-image:linear-gradient(90deg,#c18cff,#ff8ce6,#8ba4ff,#c18cff);
+ background-size:250%;
+ -webkit-background-clip:text;
+ background-clip:text;
+ color:transparent;
+}
+body[data-theme="purple"] .rank,
+body[data-theme="purple"] td.name{color:#c69aff}
+body[data-theme="purple"] .theme-btn:hover{border-color:#bd8aff}
+body[data-theme="purple"] .github-link{color:#c69aff}
+
+@media(max-width:750px){
+ .stats{grid-template-columns:repeat(2,1fr)}
+ .hero h1{letter-spacing:-1px}
+ .panel{padding:17px}
+}
+@media(max-width:450px){
+ body{padding:15px 10px}
+ .stats{gap:9px}
+ .stat{padding:13px}
+ .stat-value{font-size:20px}
+ .status{font-size:9px}
+ .topbar{align-items:flex-start}
+ .theme-btn{padding:9px 10px}
+}
+</style>
+</head>
+
+<body data-theme="dark">
+
+<div class="container">
+
+<header class="topbar">
+ <div class="logo">
+  <div class="logo-icon">⚡</div>
+  <div>
+   <h2>ENCORD SORTER</h2>
+   <small>SMART PRODUCTIVITY SYSTEM</small>
+  </div>
+ </div>
+
+ <div class="top-actions">
+  <button class="theme-btn" id="themeBtn" onclick="changeTheme()">
+   <span id="themeIcon">🌙</span>
+   <span id="themeName">Dark Mode</span>
+  </button>
+  <div class="status"><span class="dot"></span> SYSTEM READY</div>
+ </div>
+</header>
+
+<section class="hero">
+ <div class="tag">NEXT-GEN TASK MANAGEMENT</div>
+ <h1>Bulk Frame <span class="gradient">Sorter.</span></h1>
+ <p>
+  Organize your Encord tasks intelligently. Estimate frame counts,
+  sort workloads and identify shorter tasks first — all in seconds.
+ </p>
+</section>
+
+<section class="panel">
+
+ <div class="section-head">
+  <h3>▣ &nbsp; TASK INPUT TERMINAL</h3>
+  <span>Multiple filenames supported</span>
+ </div>
+
+ <textarea id="bulk"
+ placeholder="Paste your Encord filenames here...
+
+Example:
+visualization-123_XXXXXXXXXXXXX_XXXXXXXXXXXXX
+visualization-456_XXXXXXXXXXXXX_XXXXXXXXXXXXX
+
+One filename per line."></textarea>
+
+ <div class="actions">
+  <button class="primary" onclick="runSort()">⚡ Calculate & Sort</button>
+  <button class="secondary" id="copy" onclick="copyIds()" disabled>▣ Copy Task IDs</button>
+  <button class="secondary" id="csv" onclick="downloadCSV()" disabled>↓ Export CSV</button>
+  <button class="clear" onclick="clearAll()">✕ Clear All</button>
+ </div>
+
+ <div id="error" class="error"></div>
+</section>
+
+<section id="output" class="hide results">
+
+ <div class="stats">
+  <div class="stat">
+   <span class="stat-icon">📋</span>
+   <div class="stat-label">TOTAL TASKS</div>
+   <div class="stat-value" id="count">0</div>
+  </div>
+  <div class="stat">
+   <span class="stat-icon">🎯</span>
+   <div class="stat-label">SHORTEST TASK</div>
+   <div class="stat-value" id="shortest">0</div>
+  </div>
+  <div class="stat">
+   <span class="stat-icon">📊</span>
+   <div class="stat-label">TOTAL EST. FRAMES</div>
+   <div class="stat-value" id="total">0</div>
+  </div>
+  <div class="stat">
+   <span class="stat-icon">⏱️</span>
+   <div class="stat-label">TOTAL DURATION</div>
+   <div class="stat-value" id="duration">0m</div>
+  </div>
+ </div>
+
+ <section class="panel">
+  <div class="results-header">
+   <div>
+    <h3>✦ Sorted Task Queue</h3>
+    <p>Tasks arranged from lowest to highest estimated frame count.</p>
+   </div>
+   <span class="badge">OPTIMIZED ORDER</span>
+  </div>
+
+  <div class="tablewrap">
+   <table>
+    <thead>
+     <tr>
+      <th>Rank</th>
+      <th>Queue Line</th>
+      <th>Task ID</th>
+      <th>Duration</th>
+      <th>Est. Frames</th>
+      <th>Priority</th>
+     </tr>
+    </thead>
+    <tbody id="body"></tbody>
+   </table>
+  </div>
+
+  <p class="note">
+   FRAME ESTIMATION: ~0.488221586 frames per millisecond.
+   Calibration is based on three confirmed examples:
+   5,000 ms = 2,449 frames; 3,867 ms = 1,905 frames;
+   7,662 ms = 3,727 frames.
+   Estimates are not exact. Actual frame counts can vary due to
+   stream sampling and missing frames. Lower frame count does not
+   necessarily mean lower annotation complexity.
+  </p>
+ </section>
+</section>
+
+<footer class="footer">
+ <div class="made">MADE BY <span>NITIN DHURVE</span></div>
+ <p>Working at <strong>QUALITAS GLOBAL</strong></p>
+ <p class="hash"># JAMMU BOY</p>
+ <p>Smart Tools • Better Workflow • Higher Productivity</p>
+ <p>
+  <a href="https://github.com/nitinscodehub"
+     target="_blank"
+     rel="noopener noreferrer"
+     class="github-link">
+     ⌘ GitHub | @nitinscodehub ↗
+  </a>
+ </p>
+ <p>Personal Productivity Tool | 2026</p>
+</footer>
+
+</div>
+
+<div class="toast" id="toast">Success!</div>
+
+<script>
+
+let sorted=[];
+const factor=0.4882215863657641;
+
+const themes=[
+ {id:'dark',name:'Dark Mode',icon:'🌙'},
+ {id:'light',name:'Light Mode',icon:'☀️'},
+ {id:'purple',name:'Midnight',icon:'🌌'}
+];
+
+function setTheme(id){
+ const theme=themes.find(t=>t.id===id)||themes[0];
+
+ document.body.dataset.theme=theme.id;
+ document.getElementById('themeIcon').textContent=theme.icon;
+ document.getElementById('themeName').textContent=theme.name;
+
+ try{
+  localStorage.setItem('encord-sorter-theme',theme.id);
+ }catch(e){}
+}
+
+function changeTheme(){
+ const current=document.body.dataset.theme;
+ const index=themes.findIndex(t=>t.id===current);
+ const next=themes[(index+1)%themes.length];
+ setTheme(next.id);
+ showToast('Theme changed to '+next.name+'!');
+}
+
+try{
+ const savedTheme=localStorage.getItem('encord-sorter-theme');
+ if(savedTheme)setTheme(savedTheme);
+}catch(e){}
+
+function showToast(message){
+ const t=document.getElementById('toast');
+ t.textContent=message;
+ t.classList.add('show');
+ clearTimeout(window.toastTimer);
+ window.toastTimer=setTimeout(()=>{
+  t.classList.remove('show');
+ },2500);
+}
+
+function runSort(){
+
+ const lines=document.getElementById('bulk')
+ .value.split(/\r?\n/)
+ .map(x=>x.trim())
+ .filter(Boolean);
+
+ const err=document.getElementById('error');
+ err.textContent='';
+ sorted=[];
+
+ if(!lines.length){
+  err.textContent='Please paste filenames before calculating.';
+  return;
+ }
+
+ const bad=[];
+
+ lines.forEach((line,i)=>{
+
+  const m=line.match(/(\d{13})_(\d{13})/);
+
+  if(!m){
+   bad.push(i+1);
+   return;
+  }
+
+  const start=Number(m[1]);
+  const end=Number(m[2]);
+  const ms=end-start;
+
+  if(ms<=0){
+   bad.push(i+1);
+   return;
+  }
+
+  const id=(line.match(/visualization-\d+/)||[])[0]
+  ||line.split(/\s+-\s+/)[0];
+
+  sorted.push({
+   lineNo:i+1,
+   id,
+   line,
+   ms,
+   frames:Math.round(ms*factor)
+  });
+
+ });
+
+ if(bad.length){
+  err.textContent='Invalid timestamps on lines: '
+  +bad.join(', ')+'. These lines were skipped.';
+ }
+
+ if(!sorted.length){
+  document.getElementById('output').classList.add('hide');
+  document.getElementById('copy').disabled=true;
+  document.getElementById('csv').disabled=true;
+  if(!bad.length)err.textContent='No valid tasks found.';
+  return;
+ }
+
+ sorted.sort((a,b)=>
+  a.frames-b.frames||
+  a.ms-b.ms||
+  a.lineNo-b.lineNo
+ );
+
+ const totalFrames=sorted.reduce((s,x)=>s+x.frames,0);
+ const totalMs=sorted.reduce((s,x)=>s+x.ms,0);
+
+ document.getElementById('count').textContent=
+  sorted.length.toLocaleString('en-IN');
+
+ document.getElementById('shortest').textContent=
+  sorted[0].frames.toLocaleString('en-IN');
+
+ document.getElementById('total').textContent=
+  totalFrames.toLocaleString('en-IN');
+
+ document.getElementById('duration').textContent=
+  totalMs>=3600000
+  ?(totalMs/3600000).toFixed(1)+'h'
+  :(totalMs/60000).toFixed(1)+'m';
+
+ document.getElementById('body').innerHTML=
+ sorted.map((x,i)=>{
+
+  let priority='Standard';
+  let badge='badge';
+
+  if(i===0){
+   priority='Shortest';
+   badge='badge best';
+  }else if(i<Math.ceil(sorted.length*.25)){
+   priority='Low frames';
+  }
+
+  return `
+  <tr style="animation-delay:${Math.min(i*.035,.7)}s">
+   <td class="rank">#${i+1}</td>
+   <td>${x.lineNo}</td>
+   <td class="name" title="${esc(x.line)}">${esc(x.id)}</td>
+   <td>${(x.ms/1000).toFixed(2)} sec</td>
+   <td class="frame">${x.frames.toLocaleString('en-IN')}</td>
+   <td><span class="${badge}">${priority}</span></td>
+  </tr>
+  `;
+
+ }).join('');
+
+ document.getElementById('output').classList.remove('hide');
+ document.getElementById('copy').disabled=false;
+ document.getElementById('csv').disabled=false;
+
+ showToast(sorted.length+' tasks successfully sorted!');
+}
+
+function esc(s){
+ return s.replace(/[&<>"']/g,c=>({
+  '&':'&amp;',
+  '<':'&lt;',
+  '>':'&gt;',
+  '"':'&quot;',
+  "'":'&#39;'
+ }[c]));
+}
+
+async function copyIds(){
+
+ const t=sorted.map((x,i)=>
+ `${i+1}. ${x.id} | ${x.frames} estimated frames | ${x.ms} ms`
+ ).join('\n');
+
+ try{
+  await navigator.clipboard.writeText(t);
+  showToast('Sorted task IDs copied successfully!');
+ }catch(e){
+  showToast('Clipboard unavailable. Please use CSV export.');
+ }
+}
+
+function downloadCSV(){
+
+ const rows=[
+ ['Easy Rank','Original Queue Line','Task ID',
+ 'Duration (ms)','Duration (seconds)','Estimated Frames'],
+ ...sorted.map((x,i)=>[
+  i+1,x.lineNo,x.id,x.ms,
+  (x.ms/1000).toFixed(3),x.frames
+ ])
+ ];
+
+ const csv=rows.map(r=>
+  r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')
+ ).join('\r\n');
+
+ const blob=new Blob(['\uFEFF'+csv],{
+  type:'text/csv;charset=utf-8;'
+ });
+
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement('a');
+
+ a.href=url;
+ a.download='Encord_Bulk_Sorted_Tasks.csv';
+ a.click();
+
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+ showToast('CSV exported successfully!');
+}
+
+function clearAll(){
+
+ document.getElementById('bulk').value='';
+ document.getElementById('output').classList.add('hide');
+ document.getElementById('error').textContent='';
+
+ sorted=[];
+
+ document.getElementById('copy').disabled=true;
+ document.getElementById('csv').disabled=true;
+
+ showToast('Workspace cleared!');
+}
+
+</script>
+</body>
+</html>
